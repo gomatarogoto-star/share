@@ -43,7 +43,7 @@
 面接も履歴書もいらず、スマホ1台で、子どもが寝たあとの1時間だけ。
 顔出しも声出しもなし、初期費用も0円です。
 
-同じ状況の人がいたら「スマホ」ってDMしてください。
+同じ状況の人がいたら「スマホ」ってDMしてください。コメントでも大丈夫です！私から送ります。
 やり方をまとめたので送ります。</textarea>
   <div class="grid">
     <a href="01.jpg" download><img src="01.jpg" alt="1" loading="lazy"><span>1</span></a>
@@ -58,7 +58,8 @@
 <script>
 const files = ["01.jpg","02.jpg","03.jpg","04.jpg","05.jpg","06.jpg","07.jpg"];
 const msg = t => document.getElementById('msg').textContent = t;
-const text = () => document.getElementById('text').value;
+// TikTokは空の行を消すことがあるので、コピーする文章では空の行に見えない文字（点字の空白 U+2800）を入れる
+const text = () => document.getElementById('text').value.replace(/^[ 	　]*$/gm, '⠀');
 
 async function copyText() {
   try { await navigator.clipboard.writeText(text()); }
