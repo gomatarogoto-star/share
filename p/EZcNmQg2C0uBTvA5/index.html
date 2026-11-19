@@ -76,20 +76,22 @@ document.getElementById('save').onclick = async () => {
   msg('保存を始めました。「複数のファイルのダウンロード」を聞かれたら許可してください');
 };
 
-document.getElementById('share').onclick = async () => {
-  try {
-    const blobs = await Promise.all(files.map(f => fetch(f).then(r => r.blob())));
-    const list = blobs.map((b, i) => new File([b], files[i], { type: 'image/jpeg' }));
-    if (!navigator.canShare || !navigator.canShare({ files: list })) {
-      msg('このブラウザは共有に対応していません。「画像を全部保存」を使ってください');
-      return;
-    }
-    await copyText();
-    await navigator.share({ files: list });
-    msg('文章はコピー済みです。TikTokの投稿画面で貼り付けてください');
-  } catch (e) {
-    if (e.name !== 'AbortError') msg('共有できませんでした: ' + e.message);
+// 共有はボタンを押した直後でないと開けないので、画像はページを開いた時点で読み込んでおく
+let shareFiles = null;
+Promise.all(files.map(f => fetch(f).then(r => r.blob())))
+  .then(blobs => { shareFiles = blobs.map((b, i) => new File([b], files[i], { type: 'image/jpeg' })); })
+  .catch(e => msg('画像の読み込みに失敗しました: ' + e.message));
+
+document.getElementById('share').onclick = () => {
+  if (!shareFiles) { msg('画像を読み込み中です。数秒待ってからもう一度押してください'); return; }
+  if (!navigator.canShare || !navigator.canShare({ files: shareFiles })) {
+    msg('このブラウザは共有に対応していません。「画像を全部保存」を使ってください');
+    return;
   }
+  navigator.clipboard.writeText(text()).catch(() => {});
+  navigator.share({ files: shareFiles })
+    .then(() => msg('文章はコピー済みです。TikTokの投稿画面で貼り付けてください'))
+    .catch(e => { if (e.name !== 'AbortError') msg('共有できませんでした（' + e.name + '）: ' + e.message); });
 };
 </script>
 </body>
